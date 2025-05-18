@@ -1,7 +1,8 @@
 #include <iostream>
 #include <ctime>
 #include <unistd.h>
-#define numAviao 50
+#include <climits>
+#define NUMAVIAO 50
 
 using namespace std;
 
@@ -13,90 +14,65 @@ struct no {
 
 no *insere(no *L, int x, int prior);
 no *retira(no *L, int *x, int *prior);
-int vazia(no *L);
-void exibe(no *L);
+void exibe(no *L, int tempoEstimado);
 
 int main() {
-    system("clear");
+    system("clear||cls");
     srand(time(NULL));
-    int x = 0, prior = 0, tempoEstimado = 0;
-    no *FP1, *FP2, *P1, *P2;
 
-    FP1 = FP2 = NULL;
+    int x = 0, prior = 0, tempoEstimado = 0, ut = 1, aleat;
+    no *FP1, *FP2, *filaGeral, *P;
 
-    for(int i = 1; i <= numAviao; i++) {
-        FP1 = insere(FP1, i, (rand()%2)+1);
-        FP2 = insere(FP2, i, (rand()%2)+1);
+    FP1 = FP2 = filaGeral = NULL;
+
+    for(int i = 0; i < NUMAVIAO; i++) {
+        filaGeral = insere(filaGeral, i, rand()%2);
     }
 
-    cout << "Avioes que desejam pousar: " << endl;
-    exibe(FP1);
-
-    cout << endl;
-
-    cout << endl << "Avioes que desejam decolar: " << endl;
-    exibe(FP2);
-
-    cout << endl;
-
-    sleep(10);
-    system("clear");
-
-    for(int ut = 1, numImpresso = 5; (vazia(FP1) == 0) || (vazia(FP2) == 0); ut++, numImpresso+=5) {
-        cout << endl << "Unidade de tempo: " << ut  << endl;
-        cout << endl << "------------------------------------------------------------------" << endl;
-
-        if(vazia(FP1) == 0) {
-            P1 = FP1;
-            cout << "Pista de pouso atendendo o aviao: " << P1->info << " | P: " << P1->prior << endl;
-            cout << endl << endl << "=====Avioes que desejam pousar=====" << endl;
-            P1 = P1->link;
-            for(int i = 1;(i < numImpresso) && (P1 != NULL); i++) {
-                tempoEstimado = i * 2;
-                cout << "A: " << P1->info << " | P: " << P1->prior << " | T.A. de espera: " << tempoEstimado << endl;
-                P1 = P1->link;
-            }
-            if(P1 == NULL) {
-                cout << "Mais nenhum aviao solicitou pouso" << endl;
-            }
-            cout << endl;
-            if(((ut % 2) == 0)) {
-                FP1 = retira(FP1, &x, &prior);
-                cout << "> Aviao " << x << " de prioridade " << prior << " terminou de pousar" << endl;
-                if(FP1 != NULL) {
-                    cout << endl << "*****Novo aviao usando a pista de pouso*****" << endl << "A: " << FP1->info << " | P: " << FP1->prior << endl << endl;
+    do {
+        system("clear||cls");
+        cout << endl << "UNIDADE DE TEMPO: " << ut << "------------------------------------------------" << endl;
+        if(filaGeral != NULL) {
+            for(int i = 0; (i < 5) && (i < NUMAVIAO); i++) {
+                filaGeral = retira(filaGeral, &x, &prior);
+                aleat = rand()%INT_MAX;
+                if(aleat % 2 == 0) {
+                    cout << "$ O aviao " << x << " de prioridade " << prior << " pediu para pousar!" << endl;
+                    FP1 = insere(FP1, x, prior);
+                } else {
+                    cout << "$ O aviao " << x << " de prioridade " << prior << " pediu para decolar!" << endl;
+                    FP2 = insere(FP2, x, prior);
                 }
+
             }
         }
 
-        cout << endl << "------------------------------------------------------------------" << endl << endl;
-
-        if(vazia(FP2) == 0) {
-            P2 = FP2;
-            cout << "Pista de decolagem atendendo o aviao: " << P2->info << " | P: " << P2->prior << endl;
-            cout << endl << endl << "=====Avioes que desejam decolar=====" << endl;
-            P2 = P2->link;
-            for(int i = 1; (i < numImpresso) && P2 != NULL; i++) {
-                tempoEstimado = i * 2;
-                cout << "A: " << P2->info << " | P: " << P2->prior << " | T.A. de espera: " << tempoEstimado << endl;
-                P2 = P2->link;
-            }
-            if(P2 == NULL) {
-                cout << "Nenhum outro aviao solicitou decolagem" << endl;
-            }
-            cout << endl;
-            if(((ut % 3) == 0)) {
-                FP2 = retira(FP2, &x, &prior);
-                cout << "> Aviao " << x << " de prioridade " << prior << " acabou de decolar" << endl;
-                if(FP2 != NULL) {
-                    cout << endl << "*****Proximo aviao a decolar*****" << endl << "A: " << FP2->info << " | P: " << FP2->prior << endl;
-                }
-            }
+        if((ut % 2 == 0) && (FP1 != NULL)) {
+            FP1 = retira(FP1, &x, &prior);
+            cout << endl << "*****O aviao " << x << " de prioridade " << prior << " acabou de pousar*****" << endl;
         }
-        cout << endl << endl;
+        if((ut % 3 == 0) && (FP2 != NULL)) {
+            FP2 = retira(FP2, &x, &prior);
+            cout << endl << "*****O aviao " << x << " de prioridade " << prior << " acabou de decolar*****" << endl;
+        }
+
+        cout << endl << "=======Aviaoes que desejam pousar=======" << endl;
+        exibe(FP1, 2);
+        
+        cout << endl << endl << "=======Avioes que desejam decolar=======" << endl;
+        exibe(FP2, 3);
+
+        if(FP1 != NULL) {
+            cout << endl << ">> O aviao " << FP1->info << " de prioridade " << FP1->prior << " esta usando a pista de pouso" << endl;
+        }
+
+        if(FP2 != NULL) {
+            cout << endl << ">> O aviao " << FP2->info << " de prioridade " << FP2->prior << " esta usando a pista de decolagem" << endl;
+        }
+
+        ut++;
         sleep(5);
-        system("clear");
-    }
+    } while ((FP1 != NULL) || (FP2 != NULL));
 
     cout << endl << "A simulação terminou... obrigado por usar" << endl;
 
@@ -147,19 +123,15 @@ no *retira(no *L, int *x, int *prior) {
     return L;
 }
 
-int vazia(no *L) {
-    if(L == NULL) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-void exibe(no *L) {
+void exibe(no *L, int tempoEstimado) {
+    int i = 1;
     no *P = L;
-    cout << " ";
-    while(P != NULL) {
-        cout << "A: " << P->info << " P: " << P->prior << " | ";
+    if(P != NULL) {
         P = P->link;
+    }
+    while(P != NULL) {
+        cout << "A: " << P->info << " | P: " << P->prior << " | T.A. de espera: " << (tempoEstimado * i) << endl;
+        P = P->link;
+        i++;
     }
 }
